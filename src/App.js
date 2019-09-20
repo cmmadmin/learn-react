@@ -57,7 +57,7 @@ class Table extends Component {
             <span>{item.points}</span>
             <span>
               <button
-                onClick={() => this.onDismiss(item.objectID)}
+                onClick={() => onDismiss(item.objectID)}
                 type="button"
               >
                 Dismiss
