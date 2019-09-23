@@ -3,14 +3,15 @@ import './App.css';
 // import { throwStatement } from '@babel/types';
 
 const DEFAULT_QUERY = 'tampa';
+const DEFAULT_FILTER = '';
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 
-function isSearched(searchTerm) {
+function isFiltered(filterTerm) {
   return function(item) { 
-    return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    return item.title.toLowerCase().includes(filterTerm.toLowerCase());
   }
 }
 
@@ -22,6 +23,19 @@ const Button = ({ onClick, className = '', children }) =>
   >
     {children}
   </button>  
+
+const Filter = ({
+  value,
+  onChange,
+  children
+}) =>
+  <form>
+    {children} <input
+      type="text"
+      value={value}
+      onChange={onChange}
+    /> 
+  </form>
 
 const Search = ({ 
   value, 
@@ -43,7 +57,7 @@ const Search = ({
 
 const Table = ({ list, pattern, onDismiss }) =>
   <div className="table">
-    {list/*.filter(isSearched(pattern))*/.map( item =>
+    {list.filter(isFiltered(pattern)).map( item =>
       <div key={item.objectID} className="table-row">
         <span style={{ width: '50%'}}>
           <a href={item.url}>{item.title}</a>
@@ -72,12 +86,14 @@ class App extends Component {
     this.state = {
       result: null,
       searchTerm: DEFAULT_QUERY,
+      filterTerm: DEFAULT_FILTER,
     }
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.onFilterChange = this.onFilterChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
   }
 
@@ -110,6 +126,10 @@ class App extends Component {
     this.setState({ searchTerm: event.target.value });
   }
 
+  onFilterChange(event) {
+    this.setState({ filterTerm: event.target.value });
+  }
+
   onDismiss(id) {
     const isNotId = item => item.objectID !== id;
     const updatedHits = this.state.result.hits.filter(isNotId);
@@ -119,7 +139,7 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, result } = this.state;
+    const { searchTerm, filterTerm, result } = this.state;
 
     if (!result) { return null; }
 
@@ -133,11 +153,17 @@ class App extends Component {
             >
               Search
             </Search>
+            <Filter
+              value={filterTerm}
+              onChange={this.onFilterChange}
+            >
+              Filter
+            </Filter>
         </div>
         { result &&   // conditional rendering
           <Table
             list={result.hits}
-            // pattern={searchTerm}
+            pattern={filterTerm}
             onDismiss={this.onDismiss}
           />
         }
