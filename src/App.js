@@ -8,6 +8,7 @@ const DEFAULT_FILTER = '';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
+const PARAM_PAGE = 'page=';
 
 function isFiltered(filterTerm) {
   return function(item) { 
@@ -101,8 +102,8 @@ class App extends Component {
     this.setState({ result });
   }
 
-  fetchSearchTopStories(searchTerm) {
-    const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`;
+  fetchSearchTopStories(searchTerm, page = 0) {
+    const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`;
     //const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
 
     fetch(url)
@@ -140,6 +141,7 @@ class App extends Component {
 
   render() {
     const { searchTerm, filterTerm, result } = this.state;
+    const page = (result && result.page) || 0;
 
     if (!result) { return null; }
 
@@ -167,6 +169,11 @@ class App extends Component {
             onDismiss={this.onDismiss}
           />
         }
+        <div className="interactions">
+          <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
+            More
+          </Button>
+        </div>
       </div>
     )
   }
