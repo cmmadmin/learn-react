@@ -23,19 +23,27 @@ const Button = ({ onClick, className = '', children }) =>
     {children}
   </button>  
 
-const Search = ({ value, onChange, children }) =>
-  <form>
+const Search = ({ 
+  value, 
+  onChange,
+  onSubmit,
+  children
+}) =>
+  <form onSubmit={onSubmit}>
     {children} <input
       type="text"
       value={value}
       onChange={onChange}
     />
+    <button type="submit">
+      {children}
+    </button>
   </form>
 
 
 const Table = ({ list, pattern, onDismiss }) =>
   <div className="table">
-    {list.filter(isSearched(pattern)).map( item =>
+    {list/*.filter(isSearched(pattern))*/.map( item =>
       <div key={item.objectID} className="table-row">
         <span style={{ width: '50%'}}>
           <a href={item.url}>{item.title}</a>
@@ -67,7 +75,9 @@ class App extends Component {
     }
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
   }
 
@@ -75,16 +85,25 @@ class App extends Component {
     this.setState({ result });
   }
 
-  componentDidMount() {
-    const { searchTerm } = this.state;
-
-    const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+  fetchSearchTopStories(searchTerm) {
+    const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`;
     //const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
 
     fetch(url)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error);
+  }
+
+  componentDidMount() {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+  }
+
+  onSearchSubmit(event) {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+    event.preventDefault();
   }
 
   onSearchChange(event) {
@@ -110,6 +129,7 @@ class App extends Component {
             <Search
               value={searchTerm}
               onChange={this.onSearchChange}
+              onSubmit={this.onSearchSubmit}
             >
               Search
             </Search>
@@ -117,7 +137,7 @@ class App extends Component {
         { result &&   // conditional rendering
           <Table
             list={result.hits}
-            pattern={searchTerm}
+            // pattern={searchTerm}
             onDismiss={this.onDismiss}
           />
         }
