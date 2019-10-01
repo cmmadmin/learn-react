@@ -12,7 +12,10 @@ const PARAM_PAGE = 'page=';
 
 function isFiltered(filterTerm) {
   return function(item) { 
-    return item.title.toLowerCase().includes(filterTerm.toLowerCase());
+    if(item.title) 
+      return item.title.toLowerCase().includes(filterTerm.toLowerCase());
+    else
+      return false;
   }
 }
 
@@ -99,7 +102,20 @@ class App extends Component {
   }
 
   setSearchTopStories(result) {
-    this.setState({ result });
+    // concat for paginated fetch
+    const { hits, page } = result;
+
+    // check if there are old hits
+    const oldHits = page !== 0
+      ? this.state.result.hits
+      : [];
+
+    // merge old and new hits  
+    const updatedHits = [ ...oldHits, ...hits ];  // array spread operator
+
+    this.setState({ 
+      result: { hits: updatedHits, page }
+    });
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
