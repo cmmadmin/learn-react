@@ -19,6 +19,12 @@ function isFiltered(filterTerm) {
   }
 }
 
+// Conditional rendering to show loading message. Higher-order component.
+const withLoading = (Component) => ({ isLoading, ...rest }) => 
+  isLoading
+    ? <Loading />
+    : <Component { ...rest } />
+
 const Loading = () =>
   <div>Loading...</div>
 
@@ -30,6 +36,8 @@ const Button = ({ onClick, className = '', children }) =>
   >
     {children}
   </button>  
+
+const ButtonWithLoading = withLoading(Button);
 
 const Filter = ({
   value,
@@ -211,12 +219,12 @@ class App extends Component {
           />
         }
         <div className="interactions">
-          { isLoading
-            ? <Loading />
-            : <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
-                More
-              </Button>
-          }
+          <ButtonWithLoading 
+            isLoading={isLoading}
+            onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}
+          >
+            More
+          </ButtonWithLoading>
         </div>
       </div>
     )
