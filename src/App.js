@@ -91,6 +91,7 @@ class App extends Component {
       result: null,
       searchTerm: DEFAULT_QUERY,
       filterTerm: DEFAULT_FILTER,
+      error: null,
     }
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -125,7 +126,7 @@ class App extends Component {
     fetch(url)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
-      .catch(error => error);
+      .catch(error => this.setState({ error }));
   }
 
   componentDidMount() {
@@ -156,10 +157,10 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, filterTerm, result } = this.state;
+    const { searchTerm, filterTerm, result, error } = this.state;
     const page = (result && result.page) || 0;
 
-    if (!result) { return null; }
+    //if (!result) { return null; }
 
     return (
       <div className="page">
@@ -178,7 +179,11 @@ class App extends Component {
               Filter
             </Filter>
         </div>
-        { result &&   // conditional rendering
+        { error    // conditional rendering
+          ? <div className="interactions">
+              <p>Something went wrong.</p>
+            </div>
+          : result &&
           <Table
             list={result.hits}
             pattern={filterTerm}
