@@ -42,6 +42,12 @@ const Filter = ({
   </form>
 
 class Search extends Component { 
+  componentDidMount() {
+    if (this.input) {
+      this.input.focus(); // focus search input
+    }
+  }
+
   render() {
     const {
       value, 
@@ -56,6 +62,7 @@ class Search extends Component {
           type="text"
           value={value}
           onChange={onChange}
+          ref={el => this.input = el} // reference DOM element so search input can be focused on load
         />
         <button type="submit">
           {children}
