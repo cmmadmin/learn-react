@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
+import { sortBy } from 'lodash';
 import './App.css';
-// import { throwStatement } from '@babel/types';
 
 const DEFAULT_QUERY = 'tampa';
 const DEFAULT_FILTER = '';
@@ -83,9 +83,40 @@ class Search extends Component {
   }
 }
 
-const Table = ({ list, pattern, onDismiss }) =>
+const Sort = ({ sortKey, onSort, children }) =>
+  <Button 
+    onClick={() => onSort(sortKey)}
+    className="button-inline"
+  >
+    {children}
+  </Button>
+
+const Table = ({ 
+  list, 
+  pattern,
+  sortKey,
+  onSort, 
+  onDismiss
+}) =>
   <div className="table">
-    {list.filter(isFiltered(pattern)).map( item =>
+    <div className="table-header">
+      <span style={{ width: '50%' }}>
+        <Sort sortKey={'TITLE'} onSort={onSort}>TITLE</Sort>
+      </span>
+      <span style={{ width: '20%' }}>
+        <Sort sortKey={'AUTHOR'} onSort={onSort}>AUTHOR</Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        <Sort sortKey={'COMMENTS'} onSort={onSort}>COMMENTS</Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        <Sort sortKey={'POINTS'} onSort={onSort}>POINTS</Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        ARCHIVE
+      </span>      
+    </div>
+    {SORTS[sortKey](list).filter(isFiltered(pattern)).map( item =>
       <div key={item.objectID} className="table-row">
         <span style={{ width: '50%'}}>
           <a href={item.url}>{item.title}</a>
@@ -105,6 +136,13 @@ const Table = ({ list, pattern, onDismiss }) =>
     )}
   </div>    
 
+const SORTS = {
+  NONE: list => list,
+  TITLE: list => sortBy(list, 'title'),
+  AUTHOR: list => sortBy(list, 'author'),
+  COMMENTS: list => sortBy(list, 'num_comments').reverse(),
+  POINTS: list => sortBy(list, 'points').reverse(),
+};
 
 class App extends Component {
 
@@ -117,6 +155,7 @@ class App extends Component {
       filterTerm: DEFAULT_FILTER,
       error: null,
       isLoading: false,
+      sortKey: 'NONE',
     }
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -125,6 +164,7 @@ class App extends Component {
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onFilterChange = this.onFilterChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.onSort = this.onSort.bind(this);
   }
 
   setSearchTopStories(result) {
@@ -184,8 +224,19 @@ class App extends Component {
     });
   }
 
+  onSort(sortKey) {
+    this.setState({ sortKey });
+  }
+
   render() {
-    const { searchTerm, filterTerm, result, error, isLoading } = this.state;
+    const { 
+      searchTerm,
+      filterTerm,
+      result, 
+      error, 
+      isLoading,
+      sortKey
+    } = this.state;
     const page = (result && result.page) || 0;
 
     //if (!result) { return null; }
@@ -215,6 +266,8 @@ class App extends Component {
           <Table
             list={result.hits}
             pattern={filterTerm}
+            sortKey={sortKey}
+            onSort={this.onSort}
             onDismiss={this.onDismiss}
           />
         }
