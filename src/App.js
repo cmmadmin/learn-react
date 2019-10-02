@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { sortBy } from 'lodash';
+import classNames from 'classnames';
 import './App.css';
 
 const DEFAULT_QUERY = 'tampa';
@@ -89,16 +90,15 @@ const Sort = ({
   onSort, 
   children
 }) => {
-  const sortClass = ['button-inline'];
-
-  if (sortKey === activeSortKey) {
-    sortClass.push('button-active');
-  }
+  const sortClass = classNames(
+    'button-inline',
+    { 'button-active': sortKey === activeSortKey }
+  );  
 
   return (
     <Button 
       onClick={() => onSort(sortKey)}
-      className={sortClass.join(' ')}
+      className={sortClass}
     >
       {children}
     </Button>
