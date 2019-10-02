@@ -19,6 +19,9 @@ function isFiltered(filterTerm) {
   }
 }
 
+const Loading = () =>
+  <div>Loading...</div>
+
 const Button = ({ onClick, className = '', children }) =>
   <button
     onClick={onClick}
@@ -105,6 +108,7 @@ class App extends Component {
       searchTerm: DEFAULT_QUERY,
       filterTerm: DEFAULT_FILTER,
       error: null,
+      isLoading: false,
     }
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -128,13 +132,16 @@ class App extends Component {
     const updatedHits = [ ...oldHits, ...hits ];  // array spread operator
 
     this.setState({ 
-      result: { hits: updatedHits, page }
+      result: { hits: updatedHits, page },
+      isLoading: false
     });
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
     const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`;
     //const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
+
+    this.setState({ isLoading: true });
 
     fetch(url)
       .then(response => response.json())
@@ -170,7 +177,7 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, filterTerm, result, error } = this.state;
+    const { searchTerm, filterTerm, result, error, isLoading } = this.state;
     const page = (result && result.page) || 0;
 
     //if (!result) { return null; }
@@ -204,9 +211,12 @@ class App extends Component {
           />
         }
         <div className="interactions">
-          <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
-            More
-          </Button>
+          { isLoading
+            ? <Loading />
+            : <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
+                More
+              </Button>
+          }
         </div>
       </div>
     )
